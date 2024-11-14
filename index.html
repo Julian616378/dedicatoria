@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regalo Sorpresa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffecf2;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .gift-container {
+            text-align: center;
+            font-size: clamp(3rem, 10vw, 5rem);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .gift-container:hover {
+            transform: scale(1.1);
+        }
+
+        .message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(1.2rem, 5vw, 2rem);
+            color: #ff69b4;
+            text-align: center;
+            animation: fadeIn 1s;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: clamp(10px, 3vw, 20px);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+            z-index: 1000;
+            width: min(90%, 500px);
+            word-wrap: break-word;
+        }
+
+        .flower {
+            position: fixed;
+            font-size: clamp(2rem, 6vw, 3rem);
+            opacity: 0;
+            transition: opacity 1s;
+            z-index: 999;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        #flower1 { 
+            top: 5vh; 
+            left: 5vw; 
+            animation-delay: 0s;
+        }
+        #flower2 { 
+            top: 5vh; 
+            right: 5vw; 
+            animation-delay: 0.5s;
+        }
+        #flower3 { 
+            bottom: 5vh; 
+            left: 5vw; 
+            animation-delay: 1s;
+        }
+        #flower4 { 
+            bottom: 5vh; 
+            right: 5vw; 
+            animation-delay: 1.5s;
+        }
+
+        .player-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 998;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: min(3vw, 10px);
+            border-radius: 10px;
+            animation: fadeIn 2s;
+            width: min(95vw, 800px);
+            aspect-ratio: 16/9;
+        }
+
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        .fade-out {
+            animation: fadeOut 1s forwards;
+        }
+
+        @media (max-height: 600px) {
+            .flower {
+                display: none;
+            }
+        }
+
+        @media (orientation: portrait) {
+            .player-container {
+                width: 95vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-container" id="giftBox">
+        🎁
+    </div>
+
+    <div class="message" id="message1">Para vos preciosa ❤️</div>
+    <div class="message" id="message2">Cada que la escucho pienso en vos 🌹</div>
+
+    <div class="flower" id="flower1">🌹</div>
+    <div class="flower" id="flower2">🌸</div>
+    <div class="flower" id="flower3">🌺</div>
+    <div class="flower" id="flower4">🌷</div>
+
+    <div class="player-container" id="playerContainer">
+        <div class="player-wrapper">
+            <div id="player"></div>
+        </div>
+    </div>
+
+    <script>
+        let player;
+        let isVideoStarted = false;
+
+        function loadYouTubeAPI() {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+
+        function onYouTubeIframeAPIReady() {
+            const playerWidth = Math.min(window.innerWidth * 0.95, 800);
+            const playerHeight = (playerWidth * 9) / 16;
+
+            player = new YT.Player('player', {
+                width: '100%',
+                height: '100%',
+                videoId: 'tJA_mxEIJ2E',
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 1,
+                    'rel': 0,
+                    'showinfo': 0,
+                    'modestbranding': 1,
+                    'fs': 1,
+                    'playsinline': 1,
+                    'cc_load_policy': 0,
+                    'iv_load_policy': 3
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            console.log("Reproductor listo");
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING && !isVideoStarted) {
+                isVideoStarted = true;
+                console.log("Video iniciado");
+            }
+        }
+
+        function onPlayerError(event) {
+            console.error("Error en el reproductor:", event.data);
+            alert("Lo siento, hubo un error al cargar el video. Por favor, intenta de nuevo.");
+        }
+
+        document.getElementById('giftBox').addEventListener('click', function() {
+            this.style.display = 'none';
+            
+            const message1 = document.getElementById('message1');
+            const message2 = document.getElementById('message2');
+            const playerContainer = document.getElementById('playerContainer');
+            const flowers = document.querySelectorAll('.flower');
+
+            message1.style.display = 'block';
+            flowers.forEach(flower => flower.style.opacity = '1');
+
+            setTimeout(() => {
+                message1.classList.add('fade-out');
+                setTimeout(() => {
+                    message1.style.display = 'none';
+                    message2.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        message2.classList.add('fade-out');
+                        setTimeout(() => {
+                            message2.style.display = 'none';
+                            playerContainer.style.display = 'block';
+                            try {
+                                player.playVideo();
+                            } catch (e) {
+                                console.error("Error al reproducir el video:", e);
+                            }
+                        }, 1000);
+                    }, 5000);
+                }, 1000);
+            }, 8000);
+        });
+
+        // Ajustar tamaño del reproductor en cambios de orientación
+        window.addEventListener('resize', function() {
+            if (player && player.setSize) {
+                const playerWidth = Math.min(window.innerWidth * 0.95, 800);
+                const playerHeight = (playerWidth * 9) / 16;
+                player.setSize(playerWidth, playerHeight);
+            }
+        });
+
+        loadYouTubeAPI();
+    </script>
+</body>
+</html>
